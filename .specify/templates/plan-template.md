@@ -31,7 +31,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Full-stack contract impact is identified for every changed endpoint, model,
+  type, hook, and component.
+- [ ] Test strategy covers each affected layer: frontend UI/hook tests, backend
+  service/endpoint tests, and integration coverage for contract changes.
+- [ ] Simplicity is preserved: each new component, hook, service, and endpoint has
+  one clear responsibility and any new abstraction is justified.
+- [ ] Security and observability needs are addressed, including validation,
+  error handling, configuration, and logging where operationally relevant.
+- [ ] User experience expectations include loading, empty, success, and error
+  states plus accessibility considerations for user-facing changes.
 
 ## Project Structure
 
@@ -56,34 +65,26 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+# [REMOVE IF UNUSED] Option 1: Full-stack web application (DEFAULT for this repo)
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── backend/
+│   └── MockEcommerce.Api/
+│       ├── Endpoints/
+│       ├── Models/
+│       └── Services/
+└── frontend/
+  └── src/
+    ├── api/
+    ├── components/
+    ├── hooks/
+    └── types/
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+test/
+├── backend/
+│   └── MockEcommerce.Api.Tests/
+└── frontend/
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+# [REMOVE IF UNUSED] Option 2: Mobile + API (when "iOS/Android" detected)
 api/
 └── [same as backend above]
 

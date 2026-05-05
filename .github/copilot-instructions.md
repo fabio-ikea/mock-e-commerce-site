@@ -19,12 +19,20 @@ applyTo: '**'
 - **Frontend**: Vitest + React Testing Library; mirror src structure
 - **Backend**: XUnit with mocked services
 - Maintain test parity across full stack
+- Update tests for every behavior change; include integration coverage for API contract changes
 
 ## Development Patterns
 - **Components**: Reusable, prop-typed, hook-based
-- **Hooks**: Data fetching (useProducts), state management
+- **Hooks**: Data fetching (useProducts), state management, error/loading handling
+- **API Layer**: Keep `fetch` calls in `src/frontend/src/api/`, not in UI components
 - **Services**: Inject dependencies; use in-memory implementations
 - **Endpoints**: RESTful; minimal API handlers in Endpoints/
+
+## Quality Expectations
+- Model frontend and backend changes as one contract-aware feature
+- Handle loading, empty, success, and error states in user-facing flows
+- Prefer semantic HTML, keyboard accessibility, and clear labels
+- Add validation, predictable error handling, and useful diagnostics
 
 ## Common Workflows
 1. Add feature: Endpoint → Service → Component → Tests

@@ -74,6 +74,9 @@
 
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
+- What happens when the backend returns an unexpected or empty payload?
+- How does the UI behave during loading, retry, and partial-failure states?
+- What accessibility or keyboard interaction expectations apply to this feature?
 
 ## Requirements *(mandatory)*
 
@@ -89,6 +92,10 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-006**: System MUST define expected loading, success, empty, and error states
+  for each user-facing flow it introduces or changes.
+- **FR-007**: System MUST describe any API contract additions or changes and name
+  the affected frontend types, hooks, or consumers.
 
 *Example of marking unclear requirements:*
 
@@ -113,6 +120,8 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-005**: Feature acceptance MUST be verifiable through automated tests at the
+  affected layers.
 
 ## Assumptions
 
