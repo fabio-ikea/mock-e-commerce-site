@@ -13,9 +13,23 @@ public interface ICartService
     /// <summary>
     /// Adds a product to the cart or increments its quantity if already present.
     /// </summary>
-    /// <param name="item">The cart item to add.</param>
-    /// <returns>The added or updated cart item.</returns>
-    CartItem Add(CartItem item);
+    /// <param name="item">The cart item to add (with product details pre-resolved).</param>
+    /// <returns>
+    /// A <see cref="CartServiceResult"/> indicating success, validation failure (quantity cap),
+    /// or not-found.
+    /// </returns>
+    CartServiceResult Add(CartItem item);
+
+    /// <summary>
+    /// Replaces the quantity of an existing cart item.
+    /// </summary>
+    /// <param name="productId">The product whose quantity to replace.</param>
+    /// <param name="quantity">The new quantity (must be 1–5 inclusive).</param>
+    /// <returns>
+    /// A <see cref="CartServiceResult"/> indicating success, validation failure,
+    /// or not-found when the product is not currently in the cart.
+    /// </returns>
+    CartServiceResult UpdateQuantity(int productId, int quantity);
 
     /// <summary>
     /// Finds an existing cart item by product ID.
