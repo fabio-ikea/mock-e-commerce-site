@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Header } from '../../../../src/frontend/src/components/Header';
 
 describe('Header', () => {
@@ -34,5 +35,14 @@ describe('Header', () => {
   it('renders the home link with accessible label', () => {
     render(<Header cartItemCount={0} />);
     expect(screen.getByLabelText('Mock Shop home')).toBeInTheDocument();
+  });
+
+  it('calls onCartOpen when the cart button is clicked', async () => {
+    const onCartOpen = vi.fn();
+    render(<Header cartItemCount={0} onCartOpen={onCartOpen} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /shopping cart/i }));
+
+    expect(onCartOpen).toHaveBeenCalledTimes(1);
   });
 });
