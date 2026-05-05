@@ -1,0 +1,192 @@
+openapi: 3.0.3
+info:
+  title: Mock E-Commerce Cart API
+  version: 1.0.0
+  description: Contract for cart review and quantity management.
+paths:
+  /api/cart:
+    get:
+      summary: Get the current cart summary
+      operationId: getCart
+      responses:
+        '200':
+          description: Current cart state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+    post:
+      summary: Add a product to the cart
+      operationId: addToCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '201':
+          description: Product added as a new cart item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '200':
+          description: Existing cart item incremented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          description: Invalid quantity or quantity limit exceeded
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '404':
+          description: Product does not exist
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/cart/{productId}:
+    put:
+      summary: Replace the quantity of an existing cart item
+      operationId: updateCartQuantity
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartQuantityRequest'
+      responses:
+        '200':
+          description: Cart item quantity updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          description: Invalid quantity or quantity limit exceeded
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+        '404':
+          description: Cart item does not exist
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      summary: Remove a single cart item
+      operationId: removeFromCart
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '204':
+          description: Cart item removed
+        '404':
+          description: Cart item does not exist
+  /api/cart/:
+    delete:
+      summary: Clear the cart
+      operationId: clearCart
+      responses:
+        '204':
+          description: Cart cleared
+components:
+  schemas:
+    CartResponse:
+      type: object
+      required:
+        - items
+        - itemCount
+        - subtotal
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        itemCount:
+          type: integer
+          minimum: 0
+        subtotal:
+          type: number
+          format: decimal
+          minimum: 0
+    CartItem:
+      type: object
+      required:
+        - productId
+        - productName
+        - unitPrice
+        - quantity
+        - totalPrice
+      properties:
+        productId:
+          type: integer
+          minimum: 1
+        productName:
+          type: string
+        unitPrice:
+          type: number
+          format: decimal
+          minimum: 0
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 5
+        totalPrice:
+          type: number
+          format: decimal
+          minimum: 0
+    AddToCartRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+    UpdateCartQuantityRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 5
+    ValidationProblem:
+      type: object
+      required:
+        - title
+        - status
+      properties:
+        title:
+          type: string
+        status:
+          type: integer
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

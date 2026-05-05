@@ -1,105 +1,130 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Manage Cart
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `main` | **Date**: 2026-05-05 | **Spec**: `specs/001-manage-cart/spec.md`
+**Input**: Feature specification from `/specs/001-manage-cart/spec.md`
 
 **Note**: This template is filled in by the `/speckit-plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Implement a cart review and quantity-management flow that uses the existing cart
+API as the source of truth for item counts and totals. The work will complete the
+in-memory cart service and cart endpoints, add a `PUT /api/cart/{productId}`
+quantity replacement contract, return cart-summary data needed for pricing
+review, and add a frontend cart panel accessible from the existing header icon.
+The feature must enforce the per-product quantity cap of 5, keep rejected
+mutations side-effect free, and add matching frontend and backend tests.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: C# / .NET 10.0 backend; TypeScript 6 with React 19 frontend  
+**Primary Dependencies**: ASP.NET Core Minimal APIs, Microsoft.AspNetCore.OpenApi, React 19, Vite 8, Vitest 4, React Testing Library, Fetch API  
+**Storage**: In-memory singleton cart service plus mock in-memory product catalog  
+**Testing**: xUnit with `WebApplicationFactory` for backend; Vitest + React Testing Library for frontend  
+**Target Platform**: Modern desktop browsers with a local .NET web API backend
+**Project Type**: Full-stack web application  
+**Performance Goals**: Cart review and quantity changes should update visible cart state within a single user interaction for demo-sized carts without noticeable delay  
+**Constraints**: Max quantity of 5 per product; PUT updates existing cart items only; invalid requests leave the cart unchanged; cart opens from the existing header icon; user-facing controls must be keyboard accessible  
+**Scale/Scope**: Single shared demo cart, small mock catalog, one cart review surface, one new REST mutation, and matching automated coverage across frontend and backend
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [ ] Full-stack contract impact is identified for every changed endpoint, model,
-  type, hook, and component.
-- [ ] Test strategy covers each affected layer: frontend UI/hook tests, backend
-  service/endpoint tests, and integration coverage for contract changes.
-- [ ] Simplicity is preserved: each new component, hook, service, and endpoint has
-  one clear responsibility and any new abstraction is justified.
-- [ ] Security and observability needs are addressed, including validation,
-  error handling, configuration, and logging where operationally relevant.
-- [ ] User experience expectations include loading, empty, success, and error
-  states plus accessibility considerations for user-facing changes.
+- [x] Full-stack contract impact is identified for `CartEndpoints.cs`,
+  `ICartService.cs`, `InMemoryCartService.cs`, backend cart models/requests,
+  `src/frontend/src/api/index.ts`, `src/frontend/src/types/index.ts`, `App.tsx`,
+  `Header.tsx`, and new cart hook/component files.
+- [x] Test strategy covers affected layers with backend endpoint/service tests,
+  frontend cart component and hook tests, and contract-aware assertions around
+  GET/POST/PUT cart responses.
+- [x] Simplicity is preserved by keeping validation in the service/API layer,
+  fetch logic in the API layer and cart hook, and presentation concerns inside
+  dedicated cart UI components.
+- [x] Security and observability needs are addressed through quantity validation,
+  consistent rejection responses, explicit not-found handling, and user-visible
+  error states without leaking sensitive details.
+- [x] User experience expectations cover loading, empty, success, and error
+  states plus keyboard accessibility for opening, reviewing, and updating the cart.
+
+**Post-Design Gate Review**: PASS — `research.md`, `data-model.md`,
+`contracts/cart-api.yaml`, and `quickstart.md` resolve the quantity semantics,
+error behavior, and UI expectations without requiring constitution exceptions.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
+specs/001-manage-cart/
 ├── plan.md              # This file (/speckit-plan command output)
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)
 ├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
+├── contracts/
+│   └── cart-api.yaml    # Phase 1 API contract
 └── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Full-stack web application (DEFAULT for this repo)
 src/
 ├── backend/
 │   └── MockEcommerce.Api/
+│       ├── Program.cs
 │       ├── Endpoints/
+│       │   └── CartEndpoints.cs
 │       ├── Models/
+│       │   ├── CartItem.cs
+│       │   └── Product.cs
 │       └── Services/
+│           ├── ICartService.cs
+│           ├── InMemoryCartService.cs
+│           └── IProductService.cs
 └── frontend/
-  └── src/
-    ├── api/
-    ├── components/
-    ├── hooks/
-    └── types/
+    └── src/
+        ├── api/
+        │   └── index.ts
+        ├── components/
+        │   ├── Header/
+        │   │   └── Header.tsx
+        │   └── Cart/                 # new cart presentation components
+        ├── hooks/
+        │   ├── useProducts.ts
+        │   └── useCart.ts            # new cart state hook
+        ├── types/
+        │   └── index.ts
+        └── App.tsx
 
 test/
 ├── backend/
 │   └── MockEcommerce.Api.Tests/
+│       ├── Endpoints/
+│       │   └── CartEndpointTests.cs
+│       └── Services/
+│           └── InMemoryCartServiceTests.cs
 └── frontend/
-
-# [REMOVE IF UNUSED] Option 2: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+    ├── App.test.tsx
+    ├── components/
+    │   ├── Header/
+    │   │   └── Header.test.tsx
+    │   └── Cart/
+    │       └── CartPanel.test.tsx
+    └── hooks/
+        └── useCart.test.ts
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Use the existing full-stack web application layout. The
+backend change set stays inside `src/backend/MockEcommerce.Api/` and its test
+project, while the frontend change set extends `src/frontend/src/` with a small
+cart-specific hook and presentation component reachable from `App.tsx` and
+`Header.tsx`.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+> No constitution violations are expected for this feature.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| None | N/A | N/A |
